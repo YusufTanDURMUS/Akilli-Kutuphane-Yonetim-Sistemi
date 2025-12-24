@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Library - Giriş & Kayıt</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: url('https://images.unsplash.com/photo-1507842217121-9eac83e30f07?w=1920') center/cover fixed;
+            position: relative;
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(212, 163, 115, 0.25);
+            backdrop-filter: blur(8px);
+            z-index: 0;
+        }
+        .container { 
+            position: relative;
+            width: 100%;
+            max-width: 1200px;
+            height: 650px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .left-panel {
+            flex: 1;
+            background: linear-gradient(135deg, #2c1e14 0%, #4a3728 100%);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #fff;
+            padding: 3rem;
+        }
+        .left-panel::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1200') center/cover;
+            opacity: 0.35;
+            z-index: 0;
+        }
+        .left-panel .content {
+            position: relative;
+            z-index: 1;
+        }
+        .left-panel h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #d4a373;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+        }
+        .left-panel p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.5);
+        }
+        .left-panel .logo {
+            font-size: 4em;
+            margin-bottom: 20px;
+            filter: drop-shadow(3px 3px 10px rgba(0,0,0,0.5));
+        }
+        .right-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            padding: 2rem;
+        }
+        .login-box {
+            width: 85%;
+            max-width: 450px;
+        }
+        h2.form-title { 
+            text-align: center; 
+            color: #2c1e14; 
+            margin-bottom: 30px; 
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .input-group { 
+            margin-bottom: 20px; 
+        }
+        .input-group label { 
+            display: block; 
+            margin-bottom: 8px; 
+            color: #333; 
+            font-size: 0.95em; 
+            font-weight: 500;
+        }
+        .input-group input { 
+            width: 100%; 
+            padding: 14px 18px; 
+            border: 2px solid #e0e0e0; 
+            border-radius: 50px; 
+            font-size: 1em;
+            transition: 0.3s;
+            background: #f7f7f7;
+        }
+        .input-group input:focus { 
+            outline: none;
+            border-color: #d4a373;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.1);
+        }
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: linear-gradient(135deg, #d4a373 0%, #b8860b 100%);
+            color: white; 
+            border: none; 
+            border-radius: 50px; 
+            cursor: pointer; 
+            font-size: 1.05em; 
+            font-weight: 600; 
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+        button:hover { 
+            background: linear-gradient(135deg, #b8860b 0%, #8b6914 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 163, 115, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .switch-text { 
+            text-align: center; 
+            margin-top: 25px; 
+            font-size: 0.95em; 
+            color: #666;
+        }
+        .switch-text a { 
+            color: #d4a373; 
+            text-decoration: none; 
+            font-weight: 600;
+            transition: 0.3s;
+        }
+        }
+        .switch-text a:hover {
+            color: #b8860b;
+            text-decoration: underline;
+        }
+        .message { 
+            margin-top: 20px; 
+            text-align: center; 
+            font-size: 0.9em; 
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 50px;
+            display: none;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        @media (max-width: 870px) {
+            .container {
+                flex-direction: column;
+                height: 100vh;
+                max-width: 100%;
+                border-radius: 0;
+            }
+            .left-panel {
+                display: none;
+            }
+            .right-panel {
+                width: 100%;
+            }
+            .login-box {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="left-panel">
+            <div class="content">
+                <div class="logo">📚</div>
+                <h2>Dijital Kütüphaneye Hoş Geldiniz</h2>
+                <p>Binlerce kaynağa erişmek, kitaplarınızı yönetmek ve yeni dünyalar keşfetmek için giriş yapın.</p>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="login-box" id="loginBox">
+                <h2 class="form-title">Giriş Yap</h2>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="loginEmail" placeholder="ornek@mail.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Şifre</label>
+                        <input type="password" id="loginPassword" placeholder="******" required>
+                    </div>
+                    <button type="submit">Giriş Yap</button>
+                </form>
+                <p class="switch-text">
+                    Hesabın yok mu? <a href="#" onclick="showRegister()">Kayıt Ol</a> | 
+                    <a href="#" onclick="showForgotPassword()">Şifremi Unuttum</a>
+                </p>
+                <p id="loginMessage" class="message"></p>
+            </div>
+
+            <div class="login-box" id="registerBox" style="display: none;">
+                <h2 class="form-title">Yeni Üyelik</h2>
+                <form id="registerForm">
+                    <div class="input-group">
+                        <label>Ad Soyad</label>
+                        <input type="text" id="regName" placeholder="Mehmet Demir" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="regEmail" placeholder="ornek@mail.com" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Şifre</label>
+                        <input type="password" id="regPassword" placeholder="******" required>
+                    </div>
+                    <button type="submit" style="background: linear-gradient(135deg, #27ae60, #1e8449);">Kayıt Ol</button>
+                </form>
+                <p class="switch-text">
+                    Zaten üye misin? <a href="#" onclick="showLogin()">Giriş Yap</a>
+                </p>
+                <p id="regMessage" class="message"></p>
+            </div>
+
+            <div class="login-box" id="forgotPasswordBox" style="display: none;">
+                <h2 class="form-title">Şifremi Unuttum</h2>
+                <form id="forgotPasswordForm">
+                    <div class="input-group">
+                        <label>E-Posta Adresi</label>
+                        <input type="email" id="forgotEmail" placeholder="ornek@mail.com" required>
+                    </div>
+                    <button type="submit" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">Sıfırlama Linki Gönder</button>
+                </form>
+                <p class="switch-text">
+                    <a href="#" onclick="showLogin()">Giriş Sayfasına Dön</a>
+                </p>
+                <p id="forgotMessage" class="message"></p>
+            </div>
+
+            <div class="login-box" id="resetPasswordBox" style="display: none;">
+                <h2 class="form-title">Şifre Sıfırlama</h2>
+            <form id="resetPasswordForm">
+                <div class="input-group">
+                    <label>E-Posta Adresi</label>
+                    <input type="email" id="resetEmail" placeholder="ornek@mail.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Sıfırlama Kodu</label>
+                    <input type="text" id="resetToken" placeholder="E-postada gelen kodu yapıştırın" required>
+                </div>
+                <div class="input-group">
+                    <label>Yeni Şifre</label>
+                    <input type="password" id="resetPassword" placeholder="Yeni şifrenizi girin" required>
+                </div>
+                <button type="submit" style="background-color: #27ae60;">Şifreyi Sıfırla</button>
+            </form>
+            <p class="switch-text">
+                <a href="#" onclick="showLogin()">Giriş Sayfasına Dön</a>
+            </p>
+            <p id="resetMessage" class="message"></p>
+        </div>
+
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8082/api/v1/auth";
+
+        function showLogin() {
+            document.getElementById('registerBox').style.display = 'none';
+            document.getElementById('forgotPasswordBox').style.display = 'none';
+            document.getElementById('resetPasswordBox').style.display = 'none';
+            document.getElementById('loginBox').style.display = 'block';
+            clearMessages();
+        }
+
+        function showRegister() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('forgotPasswordBox').style.display = 'none';
+            document.getElementById('resetPasswordBox').style.display = 'none';
+            document.getElementById('registerBox').style.display = 'block';
+            clearMessages();
+        }
+
+        function showForgotPassword() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('registerBox').style.display = 'none';
+            document.getElementById('resetPasswordBox').style.display = 'none';
+            document.getElementById('forgotPasswordBox').style.display = 'block';
+            clearMessages();
+        }
+
+        function showResetPassword() {
+            document.getElementById('forgotPasswordBox').style.display = 'none';
+            document.getElementById('resetPasswordBox').style.display = 'block';
+            clearMessages();
+        }
+
+        function clearMessages() {
+            document.getElementById('loginMessage').innerText = "";
+            document.getElementById('regMessage').innerText = "";
+        }
+
+        // --- GİRİŞ YAPMA ---
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const msgBox = document.getElementById('loginMessage');
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (response.ok) {
+                    const token = await response.text();
+                    localStorage.setItem('jwt_token', token);
+                    msgBox.style.color = "green";
+                    msgBox.innerText = "Giriş başarılı! Yönlendiriliyorsunuz...";
+                    setTimeout(() => window.location.href = 'books.html', 1000);
+                } else {
+                    const errorText = await response.text();
+                    msgBox.style.color = "red";
+                    msgBox.innerText = "Giriş Hatası: " + errorText;
+                    alert("Giriş Hatası: " + errorText + "\nDurum Kodu: " + response.status);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Sunucuya bağlanılamadı! Backend kapalı olabilir.");
+            }
+        });
+
+        // --- KAYIT OLMA (HATA AYIKLAMALI) ---
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const msgBox = document.getElementById('regMessage');
+
+            console.log("Kayıt isteği gönderiliyor...");
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name, email: email, password: password, role: "USER" })
+                });
+
+                const resultText = await response.text();
+                console.log("Sunucu cevabı:", resultText);
+
+                if (response.ok && !resultText.includes("HATA")) {
+                    msgBox.style.color = "green";
+                    msgBox.innerText = "Kayıt Başarılı! Yönlendiriliyorsunuz...";
+                    alert("Kayıt Başarılı! Şimdi giriş yapabilirsiniz.");
+                    
+                    setTimeout(() => {
+                        showLogin();
+                        document.getElementById('loginEmail').value = email;
+                    }, 1000);
+                } else {
+                    msgBox.style.color = "red";
+                    msgBox.innerText = "Hata: " + resultText;
+                    // Eğer sessizce duruyorsa bu alert kesin çalışır
+                    alert("KAYIT HATASI!\n\nKod: " + response.status + "\nMesaj: " + resultText);
+                }
+            } catch (error) {
+                console.error("Fetch Hatası:", error);
+                alert("Sunucuya erişilemiyor! Backend çalışıyor mu?");
+            }
+        });
+
+        // --- ŞİFREMİ UNUTTUM ---
+        document.getElementById('forgotPasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value;
+            const msgBox = document.getElementById('forgotMessage');
+
+            try {
+                const response = await fetch(`${API_URL}/forgot-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                const resultText = await response.text();
+
+                if (response.ok) {
+                    msgBox.style.color = "green";
+                    msgBox.innerText = "Sıfırlama linki e-posta adresinize gönderildi!";
+                    alert(resultText);
+                    setTimeout(() => showResetPassword(), 2000);
+                } else {
+                    msgBox.style.color = "red";
+                    msgBox.innerText = "Hata: " + resultText;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Sunucuya bağlanılamadı!");
+            }
+        });
+
+        // --- ŞİFRE SIFIRLAMA ---
+        document.getElementById('resetPasswordForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const email = document.getElementById('resetEmail').value;
+            const token = document.getElementById('resetToken').value;
+            const newPassword = document.getElementById('resetPassword').value;
+            const msgBox = document.getElementById('resetMessage');
+
+            try {
+                const response = await fetch(`${API_URL}/reset-password`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, token, newPassword })
+                });
+
+                const resultText = await response.text();
+
+                if (response.ok) {
+                    msgBox.style.color = "green";
+                    msgBox.innerText = "Şifreniz başarıyla sıfırlandı!";
+                    alert(resultText);
+                    setTimeout(() => showLogin(), 2000);
+                } else {
+                    msgBox.style.color = "red";
+                    msgBox.innerText = "Hata: " + resultText;
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Sunucuya bağlanılamadı!");
+            }
+        });
+    </script>
+
+</body>
+</html>

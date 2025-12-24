@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Sanal Kütüphane</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;700&display=swap" rel="stylesheet">
+    <style>
+        /* TASARIM KODLARI (AYNI) */
+        body { background: url('https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=1920') center/cover fixed; color: white; font-family: 'Merriweather', serif; margin: 0; padding: 20px; position: relative; }
+        body::before { content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 30, 20, 0.75); z-index: -1; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.6); padding: 15px; border-radius: 10px; margin-bottom: 30px; }
+        .nav-buttons { display: flex; gap: 10px; }
+        button { cursor: pointer; border: none; border-radius: 5px; padding: 8px 15px; font-weight: bold; transition: 0.3s; }
+        .btn-primary { background: #d4a373; color: #2c1e14; }
+        .btn-primary:hover { background: #faedcd; transform: scale(1.05); }
+        .btn-success { background: #28a745; color: white; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; color: white; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-info { background: #17a2b8; color: white; } 
+        .library-shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 50px 30px; padding: 40px; background: rgba(92, 64, 51, 0.3); border-radius: 15px; backdrop-filter: blur(5px); position: relative; }
+        .book-card { width: 150px; height: 240px; position: relative; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: linear-gradient(145deg, #3a3a3a, #2d2d2d); border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1); display: flex; flex-direction: column; overflow: visible; border: 1px solid rgba(212, 163, 115, 0.2); }
+        .book-card::after { content: ""; position: absolute; bottom: -15px; left: -10px; right: -10px; height: 12px; background: linear-gradient(to bottom, #8b5a2b 0%, #654321 50%, #4a3219 100%); border-radius: 3px; box-shadow: 0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(139, 90, 43, 0.5); z-index: -1; }
+        .book-cover { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; pointer-events: none; filter: brightness(0.95); transition: filter 0.3s; }
+        .book-buttons { position: absolute; top: 100%; left: 0; right: 0; display: flex; flex-direction: column; gap: 5px; opacity: 0; transition: opacity 0.3s; z-index: 10; }
+        .book-card:hover { transform: scale(1.3) translateY(-40px) rotateY(5deg); z-index: 100; box-shadow: 0 20px 50px rgba(212, 163, 115, 0.4), 0 10px 30px rgba(0,0,0,0.9); border-color: rgba(212, 163, 115, 0.6); }
+        .book-card:hover .book-cover { filter: brightness(1.1); }
+        .book-card:hover .book-buttons { opacity: 1; }
+        .borrow-btn { background: #28a745; color: white; flex: 1; border: none; cursor: pointer; font-size: 0.8rem; padding: 8px 0; margin: 0; line-height: 1; transition: 0.2s; }
+        .borrow-btn:hover { background: #218838; }
+        .edit-btn { background: #ffc107; color: black; flex: 1; border: none; cursor: pointer; font-size: 0.8rem; padding: 8px 0; margin: 0; line-height: 1; transition: 0.2s; }
+        .edit-btn:hover { background: #e0a800; }
+        .delete-btn { background: #dc3545; color: white; flex: 1; border: none; cursor: pointer; font-size: 0.8rem; padding: 8px 0; margin: 0; line-height: 1; transition: 0.2s; }
+        .delete-btn:hover { background: #c82333; }
+        .book-details { position: absolute; bottom: 0; width: 100%; background: rgba(0,0,0,0.9); padding: 10px; font-size: 0.7em; opacity: 0; transition: 0.3s; }
+        .book-card:hover .book-details { opacity: 1; }
+        .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); justify-content:center; align-items:center; z-index: 1000; }
+        .modal-content { background: white; color: black; padding: 25px; border-radius: 10px; width: 500px; max-height: 80vh; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h2>📚 Sanal Kütüphane</h2>
+        <div class="nav-buttons">
+            <button class="btn-info" onclick="openMyBooksModal()">📖 Kitaplarım</button>
+            <button class="btn-success" onclick="openAddModal()">+ Kitap Ekle</button>
+            <button class="btn-primary" id="adminPanelBtn" style="display:none;" onclick="openAdminPanel()">👑 Admin Panel</button>
+            <button class="btn-primary" onclick="openProfileModal()">👤 Profilim</button>
+            <button class="btn-danger" onclick="logout()">Çıkış</button>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 20px; text-align: center;">
+        <button class="btn-primary" onclick="filterBooks('all')">Tümü</button>
+        <button class="btn-primary" onclick="filterBooks('Roman')">Roman</button>
+        <button class="btn-primary" onclick="filterBooks('Bilim Kurgu')">Bilim Kurgu</button>
+        <button class="btn-primary" onclick="filterBooks('Tarih')">Tarih</button>
+        <button class="btn-primary" onclick="filterBooks('Diğer')">Diğer</button>
+        <button class="btn-info" onclick="openStatsModal()">📊 İstatistikler</button>
+    </div>
+
+    <div class="library-shelf" id="shelf"></div>
+
+    <div id="addModal" class="modal">
+        <form id="addBookForm" class="modal-content" style="width: 300px;">
+            <h3>Yeni Kitap Ekle</h3>
+            <input type="text" id="title" placeholder="Kitap Adı" required style="padding:10px;">
+            <input type="text" id="author" placeholder="Yazar" required style="padding:10px;">
+            <input type="text" id="isbn" placeholder="ISBN" style="padding:10px;">
+            <select id="category" style="padding:10px;">
+                <option value="Roman">Roman</option>
+                <option value="Bilim Kurgu">Bilim Kurgu</option>
+                <option value="Tarih">Tarih</option>
+                <option value="Diğer">Diğer</option>
+            </select>
+            <input type="number" id="pageCount" placeholder="Sayfa Sayısı" style="padding:10px;">
+            <input type="text" id="imageUrl" placeholder="Resim URL" style="padding:10px;">
+            <button type="submit" class="btn-success">Kaydet</button>
+            <button type="button" class="btn-danger" onclick="closeAllModals()">İptal</button>
+        </form>
+    </div>
+
+    <div id="myBooksModal" class="modal">
+        <div class="modal-content">
+            <h3>📖 Ödünç Aldıklarım</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kitap</th>
+                        <th>Alış Tarihi</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody id="myBooksTableBody"></tbody>
+            </table>
+            <button class="btn-danger" onclick="closeAllModals()">Kapat</button>
+        </div>
+    </div>
+
+    <div id="borrowModal" class="modal">
+        <div class="modal-content" style="width: 300px; text-align: center;">
+            <h3>⏳ Süre Seçiniz</h3>
+            <p>Bu kitabı ne kadar süreyle ödünç almak istersiniz?</p>
+            
+            <select id="borrowDuration" style="width: 100%; padding: 10px; margin-bottom: 15px;">
+                <option value="7">1 Hafta (7 Gün)</option>
+                <option value="15">15 Gün</option>
+                <option value="30">1 Ay (30 Gün)</option>
+            </select>
+            
+            <input type="hidden" id="selectedBookId"> 
+            <button class="btn-success" onclick="confirmBorrow()">Onayla ve Al</button>
+            <button class="btn-danger" onclick="closeBorrowModal()">İptal</button>
+        </div>
+    </div>
+
+    <div id="editModal" class="modal">
+        <form id="editBookForm" class="modal-content" style="width: 300px;">
+            <h3>📝 Kitabı Düzenle</h3>
+            <input type="text" id="editTitle" placeholder="Kitap Adı" required style="padding:10px;">
+            <input type="text" id="editAuthor" placeholder="Yazar" required style="padding:10px;">
+            <input type="text" id="editIsbn" placeholder="ISBN" style="padding:10px;">
+            <select id="editCategory" style="padding:10px;">
+                <option value="Roman">Roman</option>
+                <option value="Bilim Kurgu">Bilim Kurgu</option>
+                <option value="Tarih">Tarih</option>
+                <option value="Diğer">Diğer</option>
+            </select>
+            <input type="number" id="editPageCount" placeholder="Sayfa Sayısı" style="padding:10px;">
+            <input type="text" id="editImageUrl" placeholder="Resim URL" style="padding:10px;">
+            <input type="number" id="editStock" placeholder="Stok" min="0" required style="padding:10px;">
+            <input type="hidden" id="editBookId">
+            <button type="submit" class="btn-success">Kaydet</button>
+            <button type="button" class="btn-danger" onclick="closeAllModals()">İptal</button>
+        </form>
+    </div>
+
+    <div id="statsModal" class="modal">
+        <div class="modal-content" style="width: 400px;">
+            <h3>📊 Kütüphane İstatistikleri</h3>
+            <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                <div style="font-size: 1.3em; margin-bottom: 10px;">
+                    <strong>📚 Toplam Kitap Sayısı:</strong> <span id="totalBooks" style="color: #dc3545;">0</span>
+                </div>
+                <div style="font-size: 1.3em;">
+                    <strong>📦 Toplam Stok:</strong> <span id="totalStock" style="color: #dc3545;">0</span>
+                </div>
+            </div>
+            
+            <h4 style="margin-top: 20px; margin-bottom: 10px;">Kategoriye Göre Dağılım:</h4>
+            <table style="width: 100%;">
+                <thead>
+                    <tr style="background: rgba(212, 163, 115, 0.3);">
+                        <th style="padding: 8px;">Kategori</th>
+                        <th style="padding: 8px; text-align: right;">Kitap Sayısı</th>
+                        <th style="padding: 8px; text-align: right;">Stok Sayısı</th>
+                    </tr>
+                </thead>
+                <tbody id="categoryTable"></tbody>
+            </table>
+            
+            <button class="btn-danger" onclick="closeAllModals()" style="width: 100%; margin-top: 15px;">Kapat</button>
+        </div>
+    </div>
+
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <h3>👤 Profil Bilgileri</h3>
+            
+            <div style="background: rgba(0,0,0,0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <strong>Ad Soyad:</strong> <span id="profileName" style="color: #dc3545;"></span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Email:</strong> <span id="profileEmail" style="color: #dc3545;"></span>
+                </div>
+                <div>
+                    <strong>Rol:</strong> <span id="profileRole" style="color: #dc3545;"></span>
+                </div>
+            </div>
+
+            <button class="btn-danger" onclick="deleteOwnAccount()" style="width: 100%; margin-bottom: 10px;">🗑️ Hesabı Sil</button>
+            <button class="btn-primary" onclick="closeAllModals()" style="width: 100%;">Kapat</button>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal">
+        <div class="modal-content" style="width: 800px;">
+            <h3>👑 Admin Panel</h3>
+            
+            <div style="margin-bottom: 20px;">
+                <button class="btn-primary" onclick="showAdminUsers()">👥 Kullanıcılar</button>
+                <button class="btn-info" onclick="showAdminBorrows()">📚 Ödünç İşlemleri</button>
+                <button class="btn-success" onclick="fixBookCategories()">🔧 Kategorileri Düzelt</button>
+            </div>
+            
+            <div id="adminContent" style="max-height: 500px; overflow-y: auto;">
+                <p style="text-align: center; color: #666;">Yukarıdaki butonlardan birini seçin</p>
+            </div>
+            
+            <button class="btn-danger" onclick="closeAllModals()" style="width: 100%; margin-top: 15px;">Kapat</button>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:8082/api/v1/books";
+        const BORROW_URL = "http://localhost:8082/api/v1/borrow"; 
+        let allBooks = [];
+
+        // --- TOKEN ÇÖZÜCÜ ---
+        function parseJwt (token) {
+            try {
+                var base64Url = token.split('.')[1];
+                var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // 1. KİTAPLARI GETİR (HATA AYIKLAMA MODU 🕵️‍♂️)
+        async function fetchBooks() {
+            const token = localStorage.getItem('jwt_token');
+            
+            // Eğer hiç token yoksa mecbur atacak.
+            if(!token) { 
+                alert("Giriş yapmamışsın, ana sayfaya yönlendiriliyorsun.");
+                window.location.href = 'index.html'; 
+                return; 
+            }
+
+            try {
+                const response = await fetch(API_URL, { headers: { 'Authorization': 'Bearer ' + token } });
+                
+                if(response.ok) {
+                    allBooks = await response.json();
+                    renderBooks(allBooks);
+                    
+                    // Admin panel butonunu göster
+                    const userPayload = parseJwt(token);
+                    if (userPayload && userPayload.role === 'ADMIN') {
+                        document.getElementById('adminPanelBtn').style.display = 'inline-block';
+                    }
+                } else {
+                    // 🚨 BURAYI DEĞİŞTİRDİM: Artık seni siteden atmıyor!
+                    const errText = await response.text();
+                    
+                    // Ekrana kocaman hata basıyoruz:
+                    alert("HATA ALDIN KANKA!\n\nHata Kodu: " + response.status + "\nMesaj: " + errText);
+                    
+                    // logout(); // <-- Bunu kapattım, artık kapanmayacak.
+                }
+            } catch (err) { 
+                console.error("Sunucu hatası", err); 
+                alert("Sunucuya bağlanılamıyor! Backend (Java) çalışıyor mu?");
+            }
+        }
+
+        // 2. KİTAPLARI LİSTELE
+        function renderBooks(books) {
+            const shelf = document.getElementById('shelf');
+            const token = localStorage.getItem('jwt_token');
+            const userPayload = parseJwt(token);
+            const userEmail = userPayload ? userPayload.sub : null;
+            const userRole = userPayload ? userPayload.role : null;
+            const isAdmin = userRole === 'ADMIN';
+            
+            shelf.innerHTML = "";
+            books.forEach(book => {
+                const img = book.imageUrl ? book.imageUrl : 'https://via.placeholder.com/150x240?text=Kitap';
+                const stockMsg = book.stock > 0 ? `Stok: ${book.stock}` : 'TÜKENDİ ❌';
+                const btnDisabled = book.stock > 0 ? '' : 'disabled style="background:gray;"';
+                
+                // Admin veya kitabı ekleyen kişi edit butonunu görebilir
+                const isCreator = book.createdBy && book.createdBy === userEmail;
+                const canEdit = isAdmin || isCreator;
+                const editBtn = canEdit ? `<button class="edit-btn" onclick="openEditModal(${book.id})">✏️ Düzenle</button>` : '';
+                
+                // Sadece admin kitap silebilir
+                const deleteBtn = isAdmin ? `<button class="delete-btn" onclick="deleteBook(${book.id})">🗑️ Sil</button>` : '';
+
+                shelf.innerHTML += `
+                    <div class="book-card">
+                        <img src="${img}" class="book-cover">
+                        <div class="book-details">
+                            <div style="font-weight:bold; color:#faedcd;">${book.title}</div>
+                            <div>${book.author}</div>
+                            <div style="color:yellow;">${stockMsg}</div>
+                        </div>
+                        <div class="book-buttons">
+                            <button class="borrow-btn" ${btnDisabled} onclick="openBorrowModal(${book.id})">
+                                ${book.stock > 0 ? '📚 Ödünç Al' : 'Stok Yok'}
+                            </button>
+                            ${editBtn}
+                            ${deleteBtn}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. ÖDÜNÇ ALMA SİSTEMİ
+        function openBorrowModal(bookId) {
+            document.getElementById('selectedBookId').value = bookId;
+            document.getElementById('borrowModal').style.display = 'flex';
+        }
+
+        function closeBorrowModal() {
+            document.getElementById('borrowModal').style.display = 'none';
+        }
+
+        async function confirmBorrow() {
+            const bookId = document.getElementById('selectedBookId').value;
+            const days = document.getElementById('borrowDuration').value;
+            const token = localStorage.getItem('jwt_token');
+
+            // Token'dan email'i çekiyoruz
+            const userPayload = parseJwt(token);
+            const userEmail = userPayload ? userPayload.sub : null; 
+
+            if (!userEmail) { alert("Kullanıcı bilgisi bulunamadı!"); return; }
+
+            try {
+                // Backend: POST /api/v1/borrow/{bookId}?days={days}
+                const url = `${BORROW_URL}/${bookId}?days=${days}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                const msg = await response.text();
+                alert(msg); 
+                
+                closeBorrowModal();
+                fetchBooks(); // Stok güncellensin diye yenile
+            } catch (error) {
+                console.error("Hata:", error);
+                alert("İşlem başarısız!");
+            }
+        }
+
+        // 4. KİTAPLARIM & İADE
+        async function openMyBooksModal() {
+            const token = localStorage.getItem('jwt_token');
+            const userPayload = parseJwt(token);
+            const email = userPayload.sub;
+
+            const response = await fetch(`${BORROW_URL}/my-books?email=${email}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const myBooks = await response.json();
+            
+            const tbody = document.getElementById('myBooksTableBody');
+            tbody.innerHTML = "";
+
+            myBooks.forEach(borrow => {
+                const isReturned = borrow.returnDate !== null;
+                const status = isReturned ? "✅ İade Edildi" : "⏳ Okunuyor";
+                const actionBtn = isReturned ? "-" : 
+                    `<button class="btn-primary" style="font-size:0.8rem;" onclick="returnBook(${borrow.id})">İade Et</button>`;
+                
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${borrow.book.title}</td>
+                        <td>${borrow.borrowDate} <br> <small>(Son: ${borrow.dueDate})</small></td>
+                        <td>${status}</td>
+                        <td>${actionBtn}</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('myBooksModal').style.display = 'flex';
+        }
+
+        async function returnBook(borrowId) {
+            if(!confirm("Kitabı iade ediyorsunuz. Emin misiniz?")) return;
+            const token = localStorage.getItem('jwt_token');
+            
+            const response = await fetch(`${BORROW_URL}/return/${borrowId}`, {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const msg = await response.text();
+            alert(msg);
+            closeAllModals();
+            fetchBooks();
+        }
+
+        // 5. KİTAP EKLEME
+        document.getElementById('addBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('jwt_token');
+            const newBook = {
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                stock: 5, // Varsayılan stok
+                category: document.getElementById('category').value,
+                imageUrl: document.getElementById('imageUrl').value
+            };
+            try {
+                const resp = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newBook)
+                });
+
+                if (resp.ok) {
+                    alert("Kitap Eklendi!");
+                } else {
+                    const txt = await resp.text();
+                    alert("Kitap eklenemedi: " + resp.status + " - " + txt);
+                }
+            } catch (err) {
+                console.error('Kitap ekleme hatası:', err);
+                alert('Kitap eklenirken hata oluştu. Konsolu kontrol edin.');
+            }
+            closeAllModals();
+            fetchBooks();
+        });
+
+        // YARDIMCILAR
+        function filterBooks(cat) {
+            if(cat==='all') renderBooks(allBooks);
+            else renderBooks(allBooks.filter(b => b.category === cat));
+        }
+        function openAddModal() { document.getElementById('addModal').style.display = 'flex'; }
+        
+        // Edit Modalı Fonksiyonları
+        function openEditModal(bookId) {
+            const book = allBooks.find(b => b.id === bookId);
+            if (!book) {
+                alert("Kitap bulunamadı!");
+                return;
+            }
+            
+            document.getElementById('editTitle').value = book.title;
+            document.getElementById('editAuthor').value = book.author;
+            document.getElementById('editIsbn').value = book.isbn;
+            document.getElementById('editCategory').value = book.category;
+            document.getElementById('editPageCount').value = book.pageCount;
+            document.getElementById('editImageUrl').value = book.imageUrl;
+            document.getElementById('editStock').value = book.stock;
+            document.getElementById('editBookId').value = bookId;
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        document.getElementById('editBookForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem('jwt_token');
+            const bookId = document.getElementById('editBookId').value;
+            
+            const updatedBook = {
+                title: document.getElementById('editTitle').value,
+                author: document.getElementById('editAuthor').value,
+                isbn: document.getElementById('editIsbn').value,
+                category: document.getElementById('editCategory').value,
+                pageCount: parseInt(document.getElementById('editPageCount').value),
+                imageUrl: document.getElementById('editImageUrl').value,
+                stock: parseInt(document.getElementById('editStock').value)
+            };
+            
+            try {
+                const resp = await fetch(`${API_URL}/${bookId}`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Authorization': 'Bearer ' + token, 
+                        'Content-Type': 'application/json' 
+                    },
+                    body: JSON.stringify(updatedBook)
+                });
+
+                if (resp.ok) {
+                    alert("Kitap başarıyla güncellendi!");
+                } else {
+                    const txt = await resp.text();
+                    alert("Güncelleme başarısız: " + resp.status + " - " + txt);
+                }
+            } catch (err) {
+                console.error('Kitap güncelleme hatası:', err);
+                alert('Güncelleme sırasında hata oluştu.');
+            }
+            closeAllModals();
+            fetchBooks();
+        });
+
+        // KİTAP SİLME FONKSİYONU (Sadece Admin)
+        async function deleteBook(bookId) {
+            if (!confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
+                return;
+            }
+
+            const token = localStorage.getItem('jwt_token');
+            
+            if (!token) {
+                alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/${bookId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert("Kitap başarıyla silindi!");
+                    fetchBooks();
+                } else {
+                    const txt = await response.text();
+                    alert("Silme başarısız: " + response.status + " - " + txt);
+                }
+            } catch (err) {
+                console.error('Kitap silme hatası:', err);
+                alert('Silme sırasında hata oluştu.');
+            }
+        }
+        
+        function closeAllModals() { 
+            document.getElementById('addModal').style.display = 'none'; 
+            document.getElementById('myBooksModal').style.display = 'none'; 
+            document.getElementById('borrowModal').style.display = 'none';
+            document.getElementById('statsModal').style.display = 'none';
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('adminModal').style.display = 'none';
+            document.getElementById('profileModal').style.display = 'none';
+        }
+        function logout() { localStorage.removeItem('jwt_token'); window.location.href = 'index.html'; }
+
+        // --- PROFIL MODAL AÇMA ---
+        async function openProfileModal() {
+            const token = localStorage.getItem('jwt_token');
+            
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/users/profile', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const user = await response.json();
+                    document.getElementById('profileName').textContent = user.name;
+                    document.getElementById('profileEmail').textContent = user.email;
+                    document.getElementById('profileRole').textContent = user.role === 'ADMIN' ? '👑 Admin' : '👤 Kullanıcı';
+                    
+                    document.getElementById('profileModal').style.display = 'flex';
+                } else {
+                    alert('Profil bilgileri yüklenemedi!');
+                }
+            } catch (err) {
+                console.error('Hata:', err);
+                alert('Sunucu hatası!');
+            }
+        }
+
+        // --- HESAP SİLME ---
+        async function deleteOwnAccount() {
+            if (!confirm('⚠️ DİKKAT! Hesabınızı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!')) {
+                return;
+            }
+
+            const token = localStorage.getItem('jwt_token');
+            
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/users/delete-account', {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert('Hesabınız silindi. Yönlendiriliyorsunuz...');
+                    logout();
+                } else {
+                    const error = await response.text();
+                    alert('HATA: ' + error);
+                }
+            } catch (err) {
+                console.error('Hata:', err);
+                alert('Sunucu hatası!');
+            }
+        }
+
+        // --- ADMIN: KULLANICI SİLME ---
+        async function deleteUser(userId) {
+            if (!confirm('Bu kullanıcıyı silmek istediğinize emin misiniz?')) {
+                return;
+            }
+
+            const token = localStorage.getItem('jwt_token');
+            
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/users/' + userId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    alert('Kullanıcı silindi!');
+                    showAdminUsers(); // Listeyi yenile
+                } else {
+                    const error = await response.text();
+                    alert('HATA: ' + error);
+                }
+            } catch (err) {
+                console.error('Hata:', err);
+                alert('Sunucu hatası!');
+            }
+        }
+
+        // Admin Panel Fonksiyonları
+        function openAdminPanel() {
+            document.getElementById('adminModal').style.display = 'flex';
+        }
+
+        async function showAdminUsers() {
+            const token = localStorage.getItem('jwt_token');
+            const adminContent = document.getElementById('adminContent');
+            adminContent.innerHTML = '<p style="text-align:center;">Yükleniyor...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/users', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const users = await response.json();
+                    let html = '<h4>👥 Kayıtlı Kullanıcılar</h4><table style="width:100%;"><thead><tr><th>ID</th><th>İsim</th><th>Email</th><th>Rol</th><th>Kayıt Tarihi</th><th>İşlem</th></tr></thead><tbody>';
+                    
+                    users.forEach(user => {
+                        const roleText = user.role === 'ADMIN' ? '👑 Admin' : '👤 User';
+                        const date = user.createdAt ? new Date(user.createdAt).toLocaleDateString('tr-TR') : '-';
+                        html += `<tr>
+                            <td>${user.id}</td>
+                            <td>${user.name}</td>
+                            <td>${user.email}</td>
+                            <td>${roleText}</td>
+                            <td>${date}</td>
+                            <td><button class="btn-danger" onclick="deleteUser(${user.id})" style="padding:5px 10px; font-size:0.8em;">Sil</button></td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    adminContent.innerHTML = html;
+                } else {
+                    adminContent.innerHTML = '<p style="color:red;">Yetkiniz yok veya hata oluştu!</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                adminContent.innerHTML = '<p style="color:red;">Sunucu hatası!</p>';
+            }
+        }
+
+        async function showAdminBorrows() {
+            const token = localStorage.getItem('jwt_token');
+            const adminContent = document.getElementById('adminContent');
+            adminContent.innerHTML = '<p style="text-align:center;">Yükleniyor...</p>';
+
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/internal/borrows', {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const borrows = await response.json();
+                    let html = '<h4>📚 Tüm Ödünç İşlemleri</h4><table style="width:100%;"><thead><tr><th>Kullanıcı</th><th>Kitap</th><th>Alış Tarihi</th><th>Son Tarih</th><th>İade Tarihi</th><th>Durum</th></tr></thead><tbody>';
+                    
+                    borrows.forEach(borrow => {
+                        const status = borrow.returnDate ? '✅ İade Edildi' : '⏳ Okunuyor';
+                        const returnDate = borrow.returnDate ? new Date(borrow.returnDate).toLocaleDateString('tr-TR') : '-';
+                        html += `<tr>
+                            <td>${borrow.user.name} (${borrow.user.email})</td>
+                            <td>${borrow.book.title}</td>
+                            <td>${borrow.borrowDate}</td>
+                            <td>${borrow.dueDate}</td>
+                            <td>${returnDate}</td>
+                            <td>${status}</td>
+                        </tr>`;
+                    });
+                    
+                    html += '</tbody></table>';
+                    adminContent.innerHTML = html;
+                } else {
+                    adminContent.innerHTML = '<p style="color:red;">Yetkiniz yok veya hata oluştu!</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                adminContent.innerHTML = '<p style="color:red;">Sunucu hatası!</p>';
+            }
+        }
+
+        async function fixBookCategories() {
+            const token = localStorage.getItem('jwt_token');
+            
+            if (!confirm('Kategorisi olmayan tüm kitaplar "Diğer" kategorisine atanacak. Onaylıyor musunuz?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8082/api/v1/internal/fix-categories', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const message = await response.text();
+                    alert('✅ ' + message);
+                    fetchBooks(); // Kitapları yenile
+                } else {
+                    alert('❌ İşlem başarısız!');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('❌ Sunucu hatası!');
+            }
+        }
+
+        // İstatistikler Modalı
+        async function openStatsModal() {
+            const token = localStorage.getItem('jwt_token');
+            
+            if (!token) {
+                alert("Oturum süreniz dolmuş, lütfen tekrar giriş yapın.");
+                window.location.href = "index.html";
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:8082/api/v1/books/stats/total-stock", {
+                    headers: { 'Authorization': 'Bearer ' + token }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    
+                    document.getElementById('totalBooks').textContent = stats.totalBooks;
+                    document.getElementById('totalStock').textContent = stats.totalStock;
+                    
+                    const categoryTable = document.getElementById('categoryTable');
+                    categoryTable.innerHTML = "";
+                    
+                    const categories = stats.byCategory;
+                    const stockByCategory = stats.stockByCategory;
+                    for (const [category, count] of Object.entries(categories)) {
+                        const stock = stockByCategory[category] || 0;
+                        const row = document.createElement('tr');
+                        row.style.borderBottom = '1px solid rgba(212, 163, 115, 0.3)';
+                        row.innerHTML = `
+                            <td style="padding: 8px; text-align: left;">${category}</td>
+                            <td style="padding: 8px; text-align: right; color: #dc3545; font-weight: bold;">${count}</td>
+                            <td style="padding: 8px; text-align: right; color: #28a745; font-weight: bold;">${stock}</td>
+                        `;
+                        categoryTable.appendChild(row);
+                    }
+                    
+                    document.getElementById('statsModal').style.display = 'flex';
+                } else {
+                    alert("İstatistikler yüklenirken hata oluştu!");
+                }
+            } catch (error) {
+                console.error("İstatistik hatası:", error);
+                alert("Sunucuya bağlanırken bir hata oluştu.");
+            }
+        }
+
+        // BAŞLAT
+        fetchBooks(); 
+    </script>
+</body>
+</html>
