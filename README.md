@@ -106,41 +106,6 @@ smart-library/
 4. **tr_audit_*** (İşlem İzleme)
    - Tüm INSERT/UPDATE/DELETE işlemleri AUDIT_LOG'a kaydedilir
 
-## Projeyi Çalıştırma
-
-### Ön Gereksinimler
-- Java 21 veya üzeri
-- MySQL 8.0 veya üzeri
-- Maven 3.6 veya üzeri
-
-### Kurulum Adımları
-
-**1. Veritabanını Oluşturun**
-```bash
-mysql -u root -p < VERITABANI_SETUP.sql
-```
-
-**2. Uygulamayı Derleyin**
-```bash
-mvn clean install
-```
-
-**3. Uygulamayı Çalıştırın**
-```bash
-mvn spring-boot:run
-```
-
-**4. Web Arayüzüne Erişin**
-```
-http://localhost:8082
-```
-
-### Test Hesapları
-
-| Rol | E-posta | Şifre |
-|-----|---------|-------|
-| Admin | admin@library.com | password123 |
-| Kullanıcı | user@example.com | password123 |
 
 ## API Endpoints
 
@@ -166,34 +131,6 @@ http://localhost:8082
 - `GET /api/admin/users` - Tüm kullanıcıları listele
 - `GET /api/admin/statistics` - Sistem istatistikleri
 
-## Katmanlı Mimari (Layered Architecture)
-
-```
-┌──────────────────────────┐
-│   PRESENTATION LAYER     │
-│   (HTML, CSS, JavaScript)│
-└──────────────┬───────────┘
-               │
-┌──────────────▼───────────┐
-│  CONTROLLER LAYER        │
-│  (REST API Endpoints)    │
-└──────────────┬───────────┘
-               │
-┌──────────────▼───────────┐
-│  SERVICE LAYER           │
-│  (İş Mantığı)            │
-└──────────────┬───────────┘
-               │
-┌──────────────▼───────────┐
-│  REPOSITORY LAYER        │
-│  (JPA Data Access)       │
-└──────────────┬───────────┘
-               │
-┌──────────────▼───────────┐
-│  DATABASE LAYER          │
-│  (MySQL)                 │
-└──────────────────────────┘
-```
 
 ## Güvenlik Özellikleri
 
@@ -217,7 +154,7 @@ Proje **3. Normal Form (3NF)** kurallarına uygun tasarlanmıştır:
 **Yusuf Tan Durmuş** - 445841  
 **Dersi Veren:** Hakan Aydın  
 **Ders:** YZM2017 - Veri Tabanı ve Yönetimi  
-**Teslim Tarihi:** 24 Aralık 2024
+**Teslim Tarihi:** 24 Aralık 2025
 
 ---
 
