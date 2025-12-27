@@ -165,7 +165,7 @@
             font-weight: 600;
             transition: 0.3s;
         }
-        }
+        
         .switch-text a:hover {
             color: #b8860b;
             text-decoration: underline;
@@ -240,6 +240,8 @@
                     <a href="#" onclick="showForgotPassword()">Şifremi Unuttum</a>
                 </p>
                 <p id="loginMessage" class="message"></p>
+                <button id="resendVerifyBtn" style="display:none;background: linear-gradient(135deg, #3498db, #1f6fb2); color:#fff; padding:10px; border:none; border-radius:6px; cursor:pointer;">Doğrulama Linkini Tekrar Gönder</button>
+                <p id="resendVerifyInfo" class="message"></p>
             </div>
 
             <div class="login-box" id="registerBox" style="display: none;">
@@ -368,6 +370,41 @@
                     msgBox.style.color = "red";
                     msgBox.innerText = "Giriş Hatası: " + errorText;
                     alert("Giriş Hatası: " + errorText + "\nDurum Kodu: " + response.status);
+
+                    // Eğer e-posta doğrulanmamışsa kullanıcıya yeniden doğrulama linki yollama seçeneği göster
+                    if (response.status === 403) {
+                        const resendBtn = document.getElementById('resendVerifyBtn');
+                        const info = document.getElementById('resendVerifyInfo');
+                        resendBtn.style.display = 'inline-block';
+                        info.style.color = '#555';
+                        info.textContent = "E-posta doğrulama linki gelmediyse, aşağıdaki butonla yeniden gönderebilirsiniz.";
+
+                        resendBtn.onclick = async () => {
+                            resendBtn.disabled = true;
+                            info.style.color = 'black';
+                            info.textContent = 'Doğrulama linki gönderiliyor...';
+                            try {
+                                const res = await fetch(`${API_URL}/resend-verification`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ email })
+                                });
+                                const text = await res.text();
+                                if (res.ok) {
+                                    info.style.color = 'green';
+                                    info.innerHTML = `Başarılı! Doğrulama linki gönderildi.<br/>Manuel kullanım için: <a href="${text}" target="_blank">${text}</a>`;
+                                } else {
+                                    info.style.color = 'red';
+                                    info.textContent = text || 'Doğrulama linki gönderilemedi.';
+                                }
+                            } catch (err) {
+                                info.style.color = 'red';
+                                info.textContent = 'Sunucuya bağlanılamadı!';
+                            } finally {
+                                resendBtn.disabled = false;
+                            }
+                        };
+                    }
                 }
             } catch (error) {
                 console.error(error);

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akıllı Kütüphane Yönetim Sistemi - Proje Raporu</title>
+    <style>
+        @page {
+            margin: 2.5cm;
+            size: A4;
+        }
+        
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            color: #000;
+            max-width: 21cm;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+        }
+        
+        h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            color: #000;
+        }
+        
+        h2 {
+            font-size: 14pt;
+            font-weight: bold;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: #000;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        
+        h3 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 10px;
+            color: #000;
+        }
+        
+        h4 {
+            font-size: 12pt;
+            font-weight: bold;
+            margin-top: 10px;
+            margin-bottom: 5px;
+            color: #333;
+            font-style: italic;
+        }
+        
+        p {
+            text-align: justify;
+            margin-bottom: 10px;
+        }
+        
+        .header-info {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 12pt;
+        }
+        
+        .header-info strong {
+            font-weight: bold;
+        }
+        
+        ul, ol {
+            margin-left: 40px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 11pt;
+        }
+        
+        table, th, td {
+            border: 1px solid #000;
+        }
+        
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+            border: 1px solid #ddd;
+            padding: 5px;
+        }
+        
+        .image-caption {
+            text-align: center;
+            font-style: italic;
+            font-size: 10pt;
+            margin-top: -10px;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        
+        hr {
+            border: none;
+            border-top: 1px solid #ccc;
+            margin: 30px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            font-style: italic;
+            font-size: 11pt;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            .page-break {
+                page-break-after: always;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>AKILLI KÜTÜPHANE YÖNETİM SİSTEMİ<br>PROJE RAPORU</h1>
+    
+    <div class="header-info">
+        <p><strong>Hazırlayan:</strong> Yusuf Tan Durmuş (445841)</p>
+        <p><strong>Ders:</strong> Veri Tabanı ve Yönetimi</p>
+    </div>
+    
+    <hr>
+    
+    <h2>1. Projenin Amacı</h2>
+    
+    <p>Bu projenin temel amacı, kütüphanelerdeki manuel takip yöntemlerinin (defter, Excel vb.) yarattığı hata ve zaman kaybını önlemek, kitap envanteri ve ödünç-iade süreçlerini dijitalleştirerek verimliliği artırmaktır.</p>
+    
+    <h3>İşlevsel ve Teknik Hedefler:</h3>
+    
+    <ul>
+        <li><strong>Envanter Takibi:</strong> Kitap stoklarının ve envanterin anlık olarak takip edilmesi.</li>
+        <li><strong>Süreç Dijitalleşmesi:</strong> Ödünç alma ve iade işlemlerinin kayıt altına alınması.</li>
+        <li><strong>Otomasyon:</strong> Geç iade durumlarında sistem tarafından otomatik ceza hesaplaması yapılması.</li>
+        <li><strong>Akademik Uygulama:</strong> Ders kapsamında öğrenilen SQL Trigger, Normalizasyon ve İlişkisel Tasarım konularının pratik uygulamaya dökülmesi.</li>
+    </ul>
+    
+    <hr>
+    
+    <h2>2. Veri Tabanı Tasarımı ve Veri Modeli</h2>
+    
+    <p>Sistemin veri tabanı, veri tutarlılığını sağlamak ve tekrarları önlemek amacıyla <strong>3. Normal Form (3NF)</strong> kurallarına uygun olarak tasarlanmıştır. Veri tabanı 5 ana tablodan oluşmaktadır.</p>
+    
+    <h3>Varlık İlişki Yapısı (ER Özeti):</h3>
+    
+    <p><strong>Users (Kullanıcılar):</strong> Admin, Öğrenci ve Personel gibi rol tabanlı kullanıcı kayıtlarını tutar. Borrows, Penalties ve Audit_Log tabloları ile 1:N (Bire-Çok) ilişkisi vardır.</p>
+    
+    <p><strong>Books (Kitaplar):</strong> ISBN, stok, yazar ve kategori bilgilerini içeren envanter tablosudur.</p>
+    
+    <p><strong>Borrows (Ödünçler):</strong> Kullanıcılar ve Kitaplar arasındaki ilişkiyi sağlayan, ödünç/iade tarihlerini tutan tablodur.</p>
+    
+    <p><strong>Penalties (Cezalar):</strong> Gecikme cezalarını tutar. Users ve Borrows tabloları ile ilişkilidir.</p>
+    
+    <p><strong>Audit_Log (İşlem Günlüğü):</strong> Sistemdeki kritik değişikliklerin (INSERT, UPDATE, DELETE) otomatik olarak kaydedildiği izleme tablosudur.</p>
+    
+    <hr>
+    
+    <h2>3. Veri Tabanı Nesneleri (Trigger - Tetikleyiciler)</h2>
+    
+    <p>Projenin "Akıllı" yönünü desteklemek ve iş mantığını veri tabanı katmanında optimize etmek için MySQL tetikleyicileri (Triggers) kullanılmıştır.</p>
+    
+    <h3>Kullanılan Temel Tetikleyiciler:</h3>
+    
+    <h4>Stok Düşürme (tr_decrease_stock_on_borrow):</h4>
+    <ul>
+        <li><strong>İşlev:</strong> Ödünç alma işlemi (INSERT into borrows) gerçekleştiğinde çalışır.</li>
+        <li><strong>Sonuç:</strong> İlgili kitabın stok adedini otomatik olarak 1 azaltır ve Audit_log'a kayıt atar.</li>
+    </ul>
+    
+    <h4>Stok Artırma (tr_increase_stock_on_return):</h4>
+    <ul>
+        <li><strong>İşlev:</strong> İade işlemi yapıldığında (return_date güncellendiğinde) çalışır.</li>
+        <li><strong>Sonuç:</strong> İlgili kitabın stok adedini 1 artırır.</li>
+    </ul>
+    
+    <h4>Otomatik Ceza Hesaplama (tr_create_penalty_on_late_return):</h4>
+    <ul>
+        <li><strong>İşlev:</strong> Kitap iade edilirken son teslim tarihi (due_date) ile iade tarihi karşılaştırılır. Eğer return_date > due_date ise tetiklenir.</li>
+        <li><strong>Hesaplama:</strong> Geciken Gün x 1.50 TL formülü ile ceza hesaplanır ve Penalties tablosuna otomatik kayıt eklenir.</li>
+    </ul>
+    
+    <hr>
+    
+    <h2>4. Teknik Mimari ve Katmanlı Yapı</h2>
+    
+    <p>Proje, kodun sürdürülebilirliğini artırmak için <strong>Katmanlı Mimari (Layered Architecture)</strong> prensibiyle Java Spring Boot üzerinde geliştirilmiştir.</p>
+    
+    <h3>Mimari Katmanları:</h3>
+    
+    <p><strong>Controller Katmanı:</strong> Dış dünyadan gelen HTTP isteklerini (REST API) karşılar (Ör: AuthController, BookController).</p>
+    
+    <p><strong>Service Katmanı:</strong> İş mantığının yürütüldüğü katmandır (Stok kontrolü, ceza hesaplama mantığı vb.).</p>
+    
+    <p><strong>Repository Katmanı:</strong> Hibernate/JPA kullanılarak veri tabanı ile iletişimin sağlandığı veri erişim katmanıdır.</p>
+    
+    <p><strong>Teknolojiler:</strong> Backend için Java 21 & Spring Boot 3.5.0, Veri tabanı için MySQL 8.0+ kullanılmıştır.</p>
+    
+    <hr>
+    
+    <h2>5. Güvenlik ve Kimlik Doğrulama</h2>
+    
+    <p>Sistem güvenliği modern standartlara uygun olarak sağlanmıştır:</p>
+    
+    <h3>Kimlik Doğrulama (Authentication):</h3>
+    <p>JWT (JSON Web Token) kullanılarak 24 saat geçerli token üretilir ve API isteklerinde doğrulama yapılır.</p>
+    
+    <h3>Parola Güvenliği:</h3>
+    <p>Kullanıcı şifreleri veri tabanında açık metin olarak tutulmaz, BCrypt algoritması ile hash'lenerek saklanır.</p>
+    
+    <h3>Yetkilendirme (Authorization):</h3>
+    <p>Admin ve Normal Kullanıcı rolleri ayrıştırılarak uç noktalara erişim kontrolü sağlanmıştır.</p>
+    
+    <h3>E-posta Bildirimleri ve Şifre Sıfırlama:</h3>
+    <p>Sistem, kullanıcılara önemli olaylar hakkında otomatik e-posta bildirimleri gönderir:</p>
+    
+    <ul>
+        <li><strong>Hoş Geldin E-postası:</strong> Yeni kullanıcı kaydında sistem tarafından otomatik olarak karşılama e-postası gönderilir.</li>
+    </ul>
+    
+    <img src="screenshots/email-welcome.png" alt="Hoş Geldin E-postası">
+    <p class="image-caption">Şekil 1: Yeni üyelik hoş geldin e-postası</p>
+    
+    <ul>
+        <li><strong>E-posta Doğrulama:</strong> Kullanıcılar hesaplarını aktifleştirmek için e-posta doğrulaması yapmalıdır.</li>
+    </ul>
+    
+    <img src="screenshots/email-verification.png" alt="E-posta Doğrulama Bildirimi">
+    <p class="image-caption">Şekil 2: Kitap iade teşekkür e-postası</p>
+    
+    <ul>
+        <li><strong>Şifre Sıfırlama:</strong> Kullanıcılar şifrelerini unuttukları zaman güvenli bir şekilde sıfırlayabilirler. Sistem, 24 saat geçerli bir sıfırlama linki içeren e-posta gönderir.</li>
+    </ul>
+    
+    <img src="screenshots/email-password-reset.png" alt="Şifre Sıfırlama E-postası">
+    <p class="image-caption">Şekil 3: Kitap ödünç alma bildirimi</p>
+    
+    <img src="screenshots/password-reset-page.png" alt="Şifre Sıfırlama Ekranı">
+    <p class="image-caption">Şekil 4: Şifre sıfırlama formu</p>
+    
+    <hr>
+    
+    <h2>6. Test Senaryoları ve Sonuçlar</h2>
+    
+    <p>Geliştirilen sistemin fonksiyonları Postman ve arayüz üzerinden test edilmiş, aşağıdaki senaryolar başarıyla sonuçlanmıştır.</p>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Test No</th>
+                <th>Senaryo</th>
+                <th>Beklenen Sonuç</th>
+                <th>Durum</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>TC-01</td>
+                <td>Kullanıcı Kaydı</td>
+                <td>Yeni kullanıcı eklenir, şifre hash'lenir.</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+            <tr>
+                <td>TC-02</td>
+                <td>Kitap Arama</td>
+                <td>Girilen isme göre doğru sonuçlar listelenir.</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+            <tr>
+                <td>TC-03</td>
+                <td>Ödünç Alma</td>
+                <td>Borrows kaydı oluşur, stok otomatik 1 azalır (Trigger).</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+            <tr>
+                <td>TC-04</td>
+                <td>Stoksuz İşlem</td>
+                <td>Stok 0 ise işlem engellenir, hata döner.</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+            <tr>
+                <td>TC-05</td>
+                <td>Geç İade ve Ceza</td>
+                <td>İade tarihi geçmişse otomatik ceza tablosu oluşur.</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+            <tr>
+                <td>TC-06</td>
+                <td>Yetkisiz Erişim</td>
+                <td>Normal kullanıcı Admin paneline erişemez (403 Hata).</td>
+                <td class="success">✔ Başarılı</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <h3>Test Ekran Görüntüleri:</h3>
+    
+    <p><strong>Yetkisiz Erişim Testi (TC-06):</strong><br>
+    Normal bir kullanıcı, admin yetkisi gerektiren endpoint'e erişmeye çalıştığında sistem 403 Forbidden hatası döndürür.</p>
+    
+    <img src="screenshots/postman-403-forbidden.png" alt="Postman API Test - 403 Forbidden">
+    <p class="image-caption">Şekil 5: Postman API testi - Yetkisiz erişim (403 Forbidden)</p>
+    
+    <hr>
+    
+    <h2>7. Sonuç ve Kazanımlar</h2>
+    
+    <p>Proje sonucunda ilişkisel veri tabanı tasarımı, 3NF normalizasyon kuralları ve Trigger kullanımı ile iş mantığının veri tabanı seviyesine taşınması konularında deneyim kazanılmıştır. Ayrıca Spring Boot ve MySQL entegrasyonu ile güvenli bir REST API altyapısı kurulmuştur.</p>
+    
+    <h3>Teknik Kazanımlar:</h3>
+    <ul>
+        <li>İlişkisel veri tabanı tasarımı ve 3NF uygulaması</li>
+        <li>MySQL Trigger'ları ile iş mantığının optimizasyonu</li>
+        <li>Spring Boot ve JPA/Hibernate entegrasyonu</li>
+        <li>JWT tabanlı güvenli kimlik doğrulama</li>
+        <li>RESTful API tasarımı ve geliştirmesi</li>
+    </ul>
+    
+    <h3>Pratik Kazanımlar:</h3>
+    <ul>
+        <li>Katmanlı mimari (Layered Architecture) uygulaması</li>
+        <li>Veri tabanı normalizasyon pratiği</li>
+        <li>Git ve sürüm kontrolü kullanımı</li>
+        <li>Postman ile API testi</li>
+        <li>Hata yönetimi ve exception handling</li>
+    </ul>
+    
+    <h3>Mühendislik Kazanımları:</h3>
+    <ul>
+        <li>Sistem analizi ve tasarımı</li>
+        <li>İş gereksinimlerini teknik çözümlere dönüştürme</li>
+        <li>Veri tutarlılığı ve bütünlüğü sağlama</li>
+        <li>Güvenlik ve veri koruma prensipleri</li>
+        <li>Kod kalitesi ve sürdürülebilirlik</li>
+    </ul>
+    
+    <hr>
+    
+    <h2>Kaynakça</h2>
+    
+    <ol>
+        <li>Spring Boot Official Documentation - https://spring.io/projects/spring-boot</li>
+        <li>MySQL 8.0 Reference Manual - https://dev.mysql.com/doc/</li>
+        <li>Hibernate ORM User Guide - https://hibernate.org/orm/documentation/</li>
+        <li>JWT.io - JSON Web Tokens - https://jwt.io/</li>
+        <li>Yusuf Tan Durmuş, "Akıllı Kütüphane Yönetim Sistemi", GitHub Repository</li>
+        <li>Ders Notları - Hakan Aydın, YZM2017 - Veri Tabanı ve Yönetimi</li>
+    </ol>
+    
+    <hr>
+    
+    <div class="footer">
+        <p><strong>Hazırlandı:</strong> 27 Aralık 2025</p>
+    </div>
+</body>
+</html>

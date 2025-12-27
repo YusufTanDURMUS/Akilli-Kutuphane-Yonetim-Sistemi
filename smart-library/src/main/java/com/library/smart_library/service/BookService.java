@@ -26,6 +26,16 @@ public class BookService {
         if (book.getCategory() == null || book.getCategory().trim().isEmpty()) {
             book.setCategory("Diğer");
         }
+        // Aynı ISBN ile tekrar eklemeyi engelle (ISBN null değilse)
+        if (book.getIsbn() != null && !book.getIsbn().trim().isEmpty()) {
+            String isbn = book.getIsbn().trim();
+            if (bookRepository.existsByIsbn(isbn)) {
+                // Mevcut kaydı döndürerek duplicate oluşmasını engelle
+                Book existing = bookRepository.findByIsbn(isbn);
+                return existing != null ? existing : bookRepository.save(book);
+            }
+            book.setIsbn(isbn);
+        }
         return bookRepository.save(book);
     }
 

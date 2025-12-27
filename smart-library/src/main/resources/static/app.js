@@ -1,7 +1,7 @@
 // --- 1. ADRESLER (Backend ile uyumlu endpointler) ---
-const LOGIN_URL = "/api/v1/auth/authenticate";
+const LOGIN_URL = "/api/v1/auth/login";
 const REGISTER_URL = "/api/v1/auth/register";
-const BORROW_URL = "/api/v1/borrows"; // Ödünç alma işlemi için ana URL
+const BORROW_URL = "/api/v1/borrow"; // Ödünç alma işlemi için ana URL
 
 // --- 2. SEÇİCİLER (Auth Sayfası İçin) ---
 // Not: Bu elemanlar books.html sayfasında yoksa hata vermemesi için kontrol edilebilir
@@ -218,7 +218,7 @@ async function openStatsModal() {
 
     try {
         // Backend: GET /api/v1/books/stats/total-stock
-        const response = await fetch("http://localhost:8081/api/v1/books/stats/total-stock", {
+        const response = await fetch("/api/v1/books/stats/total-stock", {
             headers: { 'Authorization': 'Bearer ' + token }
         });
 

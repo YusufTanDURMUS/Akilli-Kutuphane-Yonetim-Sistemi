@@ -1,0 +1,499 @@
+{
+  "info": {
+    "name": "Smart Library API",
+    "description": "Akıllı Kütüphane Yönetim Sistemi - Tüm API Endpoints",
+    "version": "1.0.0"
+  },
+  "item": [
+    {
+      "name": "1. AUTH - Kayıt & Giriş",
+      "item": [
+        {
+          "name": "1.1 Kayıt Ol (Register)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ahmet Yılmaz\",\n  \"email\": \"ahmet@example.com\",\n  \"password\": \"Sifre123!\",\n  \"role\": \"USER\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Giriş Yap (Login)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@example.com\",\n  \"password\": \"Sifre123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/login",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "1.3 Admin Oluştur (Geliştirme)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"admin\",\n  \"email\": \"admin@mail.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/create-admin",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "create-admin"]
+            }
+          }
+        },
+        {
+          "name": "1.4 Tüm Kullanıcıları Listele (Geliştirme)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "users"]
+            }
+          }
+        },
+        {
+          "name": "1.5 Tüm Kullanıcıları Doğrula (Geliştirme)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/verify-all-users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "verify-all-users"]
+            }
+          }
+        },
+        {
+          "name": "1.6 Şifre Sıfırlama Talebi (Forgot Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@example.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/forgot-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "forgot-password"]
+            }
+          }
+        },
+        {
+          "name": "1.7 Yeni Şifre Ayarla (Reset Password)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@example.com\",\n  \"token\": \"SIFIRLAMA_TOKEN_BURAYA\",\n  \"newPassword\": \"YeniSifre123!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/reset-password",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "reset-password"]
+            }
+          }
+        },
+        {
+          "name": "1.8 Doğrulama Linkini Tekrar Gönder",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ahmet@example.com\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/auth/resend-verification",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "auth", "resend-verification"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. BOOKS - Kitap İşlemleri",
+      "item": [
+        {
+          "name": "2.1 Tüm Kitapları Listele",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books"]
+            }
+          }
+        },
+        {
+          "name": "2.2 Kitap Detayı (ID ile)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.3 Kategoriye Göre Kitap Ara",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/category/Tarih",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "category", "Tarih"]
+            }
+          }
+        },
+        {
+          "name": "2.4 Yazar Adına Göre Ara",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/author/Mustafa%20Kemal%20Atatürk",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "author", "Mustafa%20Kemal%20Atatürk"]
+            }
+          }
+        },
+        {
+          "name": "2.5 Kitap Ekle (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Yeni Kitap\",\n  \"author\": \"Yazar Adı\",\n  \"category\": \"Roman\",\n  \"isbn\": \"9789999999999\",\n  \"pageCount\": 300,\n  \"stock\": 50,\n  \"imageUrl\": \"https://example.com/kitap.jpg\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books"]
+            }
+          }
+        },
+        {
+          "name": "2.6 Kitap Güncelle (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Güncellenmiş Başlık\",\n  \"author\": \"Yazar Adı\",\n  \"category\": \"Roman\",\n  \"pageCount\": 350,\n  \"stock\": 45\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.7 Kitap Sil (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "1"]
+            }
+          }
+        },
+        {
+          "name": "2.8 Kütüphane İstatistikleri",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/books/stats/total-stock",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "books", "stats", "total-stock"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. BORROW - Ödünç İşlemleri",
+      "item": [
+        {
+          "name": "3.1 Kitap Ödünç Al",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/borrow/1?days=7",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "borrow", "1"],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "7"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "3.2 Ödünç Alınanları Listele",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/borrow",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "borrow"]
+            }
+          }
+        },
+        {
+          "name": "3.3 Kitap İade Et",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/borrow/return/1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "borrow", "return", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. USERS - Kullanıcı Yönetimi (Admin)",
+      "item": [
+        {
+          "name": "4.1 Tüm Kullanıcıları Listele (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/users",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "users"]
+            }
+          }
+        },
+        {
+          "name": "4.2 Kullanıcı Rolünü Değiştir (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer JWT_TOKEN_BURAYA"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"ADMIN\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/users/2/role",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "users", "2", "role"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. MAINTENANCE - Sistem Bakımı (Geliştirme)",
+      "item": [
+        {
+          "name": "5.1 Test Maili Gönder",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/test-email",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "test-email"]
+            }
+          }
+        },
+        {
+          "name": "5.2 Kitap Resimlerini Düzelt",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/fix-book-images",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "fix-book-images"]
+            }
+          }
+        },
+        {
+          "name": "5.3 Boş Kategorileri Düzelt",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8082/api/v1/internal/fix-empty-categories",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8082",
+              "path": ["api", "v1", "internal", "fix-empty-categories"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

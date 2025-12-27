@@ -79,7 +79,8 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        Role effectiveRole = (role != null) ? role : Role.USER;
+        return List.of(new SimpleGrantedAuthority("ROLE_" + effectiveRole.name()));
     }
 
     @Override
@@ -109,7 +110,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return verified;
+        // E-posta doğrulaması opsiyonel: her zaman etkin kabul et
+        return true;
     }
 
     // --- Getter & Setter ---

@@ -41,7 +41,8 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         // 1. STATİK DOSYALAR (Resim, CSS, JS, Favicon)
-                        .requestMatchers("/", "/index.html", "/books.html", "/favicon.ico", "/*.css", "/*.js",
+                        .requestMatchers("/", "/index.html", "/books.html", "/reset-password.html",
+                                "/verify-email.html", "/favicon.ico", "/*.css", "/*.js",
                                 "/images/**")
                         .permitAll()
 

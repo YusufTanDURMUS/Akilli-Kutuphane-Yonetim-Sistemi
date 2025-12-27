@@ -94,18 +94,14 @@ public class AuthController {
 
             User user = userOpt.get();
 
-            // E-posta doğrulaması kontrolü - Authentication'dan önce
-            if (!user.isVerified()) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body("HATA: E-posta adresiniz doğrulanmamış! Lütfen e-postanızdaki doğrulama linkine tıklayın.");
-            }
+            // E-posta doğrulaması artık zorunlu değil (verified kontrolü kaldırıldı)
 
             // Spring Security ile otomatik doğrulama
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             // Kullanıcının rolünü al ve token'a ekle
-            String userRole = user.getRole().toString();
+            String userRole = Optional.ofNullable(user.getRole()).orElse(User.Role.USER).toString();
             String token = jwtUtil.generateTokenWithRole(loginRequest.getEmail(), userRole);
             return ResponseEntity.ok(token);
         } catch (BadCredentialsException e) {
@@ -138,6 +134,39 @@ public class AuthController {
         user.setVerificationTokenExpiry(null);
         userRepository.save(user);
         return ResponseEntity.ok("E-posta doğrulandı! Artık giriş yapabilirsin.");
+    }
+
+    // --- DOĞRULAMA LİNKİNİ TEKRAR GÖNDER ---
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerification(@RequestBody ResendVerificationRequest req) {
+        Optional<User> userOpt = userRepository.findByEmail(req.getEmail());
+        if (userOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kullanıcı bulunamadı!");
+        }
+
+        User user = userOpt.get();
+
+        if (user.isVerified()) {
+            return ResponseEntity.ok("Zaten doğrulanmış. Giriş yapabilirsiniz.");
+        }
+
+        // Yeni doğrulama token ve süre üret
+        String token = UUID.randomUUID().toString();
+        user.setVerificationToken(token);
+        user.setVerificationTokenExpiry(LocalDateTime.now().plusHours(24));
+        userRepository.save(user);
+
+        String verifyLink = "http://localhost:8082/verify-email.html?token=" + token;
+
+        try {
+            emailService.sendVerificationEmail(user.getEmail(), user.getName(), verifyLink);
+        } catch (Exception e) {
+            // Mail gönderimi başarısız olsa bile manuel kullanım için linki döndürüyoruz
+            return ResponseEntity.ok(verifyLink);
+        }
+
+        // Başarılı durumda da linki döndürüyoruz ki kullanıcı direkt tıklayabilsin
+        return ResponseEntity.ok(verifyLink);
     }
 
     // --- KULLANICILARI LİSTELE (Test İçin) ---
@@ -243,6 +272,19 @@ public class AuthController {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+    }
+
+    // Doğrulama mailini tekrar gönderme isteği DTO'su
+    public static class ResendVerificationRequest {
+        private String email;
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
         }
     }
 
