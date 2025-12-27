@@ -217,7 +217,7 @@ Proje **3. Normal Form (3NF)** kurallarına uygun tasarlanmıştır:
 **Yusuf Tan Durmuş** - 445841  
 **Dersi Veren:** Hakan Aydın  
 **Ders:** YZM2017 - Veri Tabanı ve Yönetimi  
-**Teslim Tarihi:** 24 Aralık 2024
+**Teslim Tarihi:** 24 Aralık 2025
 
 ---
 
