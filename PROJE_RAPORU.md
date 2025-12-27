@@ -76,13 +76,9 @@ Sistemin veri tabanı, veri tutarlılığını sağlamak ve tekrarları önlemek
         │     created_at (TIMESTAMP) │
         │     updated_at (TIMESTAMP) │
         └────────────────────────────┘
-        
-Göstergeleme:
-PK = Primary Key (Birincil Anahtar)
-FK = Foreign Key (Yabancı Anahtar)
-UK = Unique Key (Benzersiz Anahtar)
-1:N = Bire-Çok İlişki
-N:1 = Çoktan-Bire İlişki
+
+PK = Primary Key | FK = Foreign Key | UK = Unique Key
+1:N = Bire-Çok İlişki | N:1 = Çoktan-Bire İlişki
 ```
 
 ### Tablo Detayları ve İlişkiler
