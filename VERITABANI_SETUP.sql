@@ -769,5 +769,4 @@ mysql> source full_database_setup.sql;
 
 ---
 
-**Hazırlandı:** 24 Aralık 2024  
-**Versiyon:** 1.0.0
+
