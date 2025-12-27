@@ -1,268 +1,211 @@
-# Akıllı Kütüphane Yönetim Sistemi - Proje Raporu
+# AKILLI KÜTÜPHANE YÖNETİM SİSTEMİ - PROJE RAPORU
 
-## Dersin Bilgileri
-
-**Üniversite:** Karadeniz Teknik Üniversitesi  
-**Fakülte:** Of Teknoloji Fakültesi  
-**Bölüm:** Yazılım Mühendisliği  
-**Ders:** YZM2017 - Veri Tabanı ve Yönetimi  
-
-**Hazırlayan:** Yusuf Tan Durmuş - 445841  
+**Hazırlayan:** Yusuf Tan Durmuş (445841)  
+**Ders:** Veri Tabanı ve Yönetimi  
 **Dersi Veren:** Hakan Aydın  
 **Teslim Tarihi:** 24 Aralık 2024
 
 ---
 
-## 1. Giriş ve Projenin Amacı
+## 1. Projenin Amacı
 
-Kütüphanelerdeki manuel takip yöntemleri (defter, Excel vb.) hata ve zaman kaybına yol açmaktadır. Bu proje, kitap envanteri ve ödünç-iade süreçlerini dijitalleştirerek insan hatasını azaltmayı ve verimliliği artırmayı amaçlayan bir web tabanlı yönetim sistemidir.
+Bu projenin temel amacı, kütüphanelerdeki manuel takip yöntemlerinin (defter, Excel vb.) yarattığı hata ve zaman kaybını önlemek, kitap envanteri ve ödünç-iade süreçlerini dijitalleştirerek verimliliği artırmaktır.
 
-### Temel Hedefler
+### İşlevsel ve Teknik Hedefler
 
-- Envanter ve stok takibinin anlık yapılması
-- Ödünç alma/iade işlemlerinin kayıt altına alınması
-- Geç iade durumlarında otomatik ceza hesaplama
-- Ders kapsamındaki SQL Trigger, Normalizasyon ve İlişkisel Tasarım konularını uygulamak
-
----
-
-## 2. Kullanılan Teknolojiler ve Araçlar
-
-Proje Katmanlı Mimari (Layered Architecture) ile geliştirilmiştir:
-
-| Teknoloji | Sürüm | Amacı |
-|-----------|-------|-------|
-| Java | 21 | Backend programlama dili |
-| Spring Boot | 3.5.0 | REST API ve web framework'ü |
-| MySQL | 8.0+ | İlişkisel veritabanı |
-| Hibernate/JPA | Latest | ORM (Object-Relational Mapping) |
-| HTML/CSS/JavaScript | - | Frontend arayüzü |
-| Maven | 3.6+ | Build ve bağımlılık yönetimi |
-| JWT | 0.11.5 | Kimlik doğrulama ve authorization |
-| BCrypt | Built-in | Şifre hashleme |
+- **Envanter Takibi:** Kitap stoklarının ve envanterin anlık olarak takip edilmesi
+- **Süreç Dijitalleşmesi:** Ödünç alma ve iade işlemlerinin kayıt altına alınması
+- **Otomasyon:** Geç iade durumlarında sistem tarafından otomatik ceza hesaplaması yapılması
+- **Akademik Uygulama:** Ders kapsamında öğrenilen SQL Trigger, Normalizasyon ve İlişkisel Tasarım konularının pratik uygulamaya dökülmesi
 
 ---
 
-## 3. Sistem Analizi ve Tasarım
+## 2. Veri Tabanı Tasarımı ve Veri Modeli
 
-### 3.1. Veritabanı Tasarımı
+Sistemin veri tabanı, veri tutarlılığını sağlamak ve tekrarları önlemek amacıyla **3. Normal Form (3NF)** kurallarına uygun olarak tasarlanmıştır. Veri tabanı 5 ana tablodan oluşmaktadır.
 
-Sistem 5 ana tablodan oluşur:
+### Varlık İlişki Yapısı (ER Özeti)
 
-1. **users** - Kullanıcı kayıtları (Admin, Öğrenci, Personel)
-2. **books** - Kitap envanteri
-3. **borrows** - Ödünç işlemleri
-4. **penalties** - Geç iade cezaları
-5. **audit_log** - İşlem izleme günlüğü
+**Users (Kullanıcılar)**
+- Admin, Öğrenci ve Personel gibi rol tabanlı kullanıcı kayıtlarını tutar
+- Borrows, Penalties ve Audit_Log tabloları ile 1:N (Bire-Çok) ilişkisi vardır
 
-### 3.2. ER Diyagramı
+**Books (Kitaplar)**
+- ISBN, stok, yazar ve kategori bilgilerini içeren envanter tablosudur
+- Borrows tablosu ile 1:N ilişkisi vardır
 
-```
-USERS (1) ←────→ (N) BORROWS ←────→ (1) BOOKS
-  │                      │
-  │                      ├─→ (1) PENALTIES (N)
-  └──────────────────────┘
-  
-AUDIT_LOG (Tüm işlemleri kaydeder)
-```
+**Borrows (Ödünçler)**
+- Kullanıcılar ve Kitaplar arasındaki ilişkiyi sağlayan, ödünç/iade tarihlerini tutan tablodur
+- Users ve Books tabloları ile N:1 (Çoktan-Bire) ilişkisi vardır
 
-#### Tablo Yapıları
+**Penalties (Cezalar)**
+- Gecikme cezalarını tutar
+- Users ve Borrows tabloları ile ilişkilidir
 
-**USERS:**
-- id (PK)
-- name, email (UNIQUE)
-- password (BCrypt hashed)
-- role (ENUM: ADMIN, USER, STUDENT)
-- verified, reset_token, verification_token
-- created_at
-
-**BOOKS:**
-- id (PK)
-- isbn (UNIQUE), title, author
-- category, page_count
-- stock (INT, >= 0)
-- image_url, created_by, created_at
-
-**BORROWS:**
-- id (PK)
-- user_id (FK), book_id (FK)
-- borrow_date, due_date, return_date (NULL ise iade yapılmamış)
-- created_at
-
-**PENALTIES:**
-- id (PK)
-- user_id (FK), borrow_id (FK)
-- days_overdue, fine_amount
-- paid (BOOL), created_at
-
-**AUDIT_LOG:**
-- id (PK)
-- table_name, operation (INSERT/UPDATE/DELETE)
-- record_id, user_id, description, timestamp
-
-### 3.3. Normalizasyon (3NF)
-
-**1NF (Atomic Values):**
-- Tüm alanlar atomik değerler içerir
-- Tekrarlayan veri grupları yok
-
-**2NF (Remove Partial Dependencies):**
-- Tüm non-key alanlar birincil anahtara tam bağımlı
-
-**3NF (Remove Transitive Dependencies):**
-- Geçişli bağımlılıklar kaldırıldı
-- Örnek: Borrows tablosunda yazar bilgisi tutulmaz; yazar sadece Books tablosunda yer alır
-
-### 3.4. Katmanlı Mimari
-
-```
-┌─────────────────────────────────┐
-│  CONTROLLER LAYER               │
-│  (HTTP isteklerini karşılar)    │
-├─────────────────────────────────┤
-│  SERVICE LAYER                  │
-│  (İş mantığı)                   │
-├─────────────────────────────────┤
-│  REPOSITORY LAYER               │
-│  (Veri erişimi - JPA)           │
-├─────────────────────────────────┤
-│  DATABASE LAYER                 │
-│  (MySQL)                        │
-└─────────────────────────────────┘
-```
-
-**Katmanlar:**
-1. **Controller:** HTTP isteklerini karşılar (AuthController, BookController, BorrowController vb.)
-2. **Service:** İş mantığı, stok kontrolü, ceza hesaplama
-3. **Repository:** JPA ile CRUD operasyonları
-4. **Database:** MySQL ile veri saklama
+**Audit_Log (İşlem Günlüğü)**
+- Sistemdeki kritik değişikliklerin (INSERT, UPDATE, DELETE) otomatik olarak kaydedildiği izleme tablosudur
 
 ---
 
-## 4. Geliştirilen Özellikler ve Tetikleyiciler
+## 3. Veri Tabanı Nesneleri (Trigger - Tetikleyiciler)
 
-### 4.1. Veritabanı Tetikleyicileri (Triggers)
+Projenin "Akıllı" yönünü desteklemek ve iş mantığını veri tabanı katmanında optimize etmek için MySQL tetikleyicileri (Triggers) kullanılmıştır.
 
-Sistemin "akıllı" yönü tetikleyicilerle sağlanmıştır:
+### Kullanılan Temel Tetikleyiciler
 
-#### 1. Stok Azaltma (tr_decrease_stock_on_borrow)
-- **Olay:** borrows tablosuna INSERT
-- **İşlem:** İlgili kitabın stokunu 1 azalt
-- **Kontrol:** Stok 0'dan düşerse hata döner
-- **Günlük:** Audit_log'a kaydı yazılır
+#### 1. Stok Düşürme (tr_decrease_stock_on_borrow)
+
+- **İşlev:** Ödünç alma işlemi (INSERT into borrows) gerçekleştiğinde çalışır
+- **Sonuç:** İlgili kitabın stok adedini otomatik olarak 1 azaltır ve Audit_log'a kayıt atar
+- **Kontrol:** Stok 0'dan düşerse işlem engellenir
 
 #### 2. Stok Artırma (tr_increase_stock_on_return)
-- **Olay:** borrows tablosunda return_date güncellendiğinde
-- **İşlem:** İlgili kitabın stokunu 1 artır
-- **Günlük:** Audit_log'a kaydı yazılır
 
-#### 3. Otomatik Ceza (tr_create_penalty_on_late_return)
-- **Olay:** İade tarihi vade tarihinden sonra ise
-- **Hesaplama:** `ceza = geç_gün_sayısı × 10 TL`
-- **Örnek:** 3 gün geç = 30 TL ceza
-- **Kayıt:** penalties tablosuna otomatik eklenir
+- **İşlev:** İade işlemi yapıldığında (return_date güncellendiğinde) çalışır
+- **Sonuç:** İlgili kitabın stok adedini 1 artırır
+- **Günlük:** Audit_log'a işlem kaydı yazılır
+
+#### 3. Otomatik Ceza Hesaplama (tr_create_penalty_on_late_return)
+
+- **İşlev:** Kitap iade edilirken son teslim tarihi (due_date) ile iade tarihi karşılaştırılır
+- **Koşul:** Eğer return_date > due_date ise tetiklenir
+- **Hesaplama:** Geciken Gün × 10 TL formülü ile ceza hesaplanır
+- **Kayıt:** Penalties tablosuna otomatik kayıt eklenir
 
 #### 4. İşlem İzleme (Audit Logging)
+
 - **Neler Kaydedilir:** Tüm INSERT, UPDATE, DELETE işlemleri
 - **Bilgiler:** Tablo adı, işlem tipi, kayıt ID, kullanıcı, tarih/saat
 - **Amaç:** Sistem denetimi ve uyumsuzluk tespiti
 
-### 4.2. Ödünç Alma İş Akışı
+---
+
+## 4. Teknik Mimari ve Katmanlı Yapı
+
+Proje, kodun sürdürülebilirliğini artırmak için **Katmanlı Mimari (Layered Architecture)** prensibiyle Java Spring Boot üzerinde geliştirilmiştir.
+
+### Mimari Katmanları
 
 ```
-1. Kullanıcı kitap ödünç alma isteği gönderir
-   ↓
-2. Stok kontrolü yapılır (Service katmanında)
-   ↓
-3. Eğer stok yoksa işlem engellenir
-   ↓
-4. Eğer stok varsa BORROWS tablosuna INSERT yapılır
-   ↓
-5. Tetikleyici çalışır → BOOKS tablosundaki stok 1 azalır
-   ↓
-6. Audit_log'a işlem kaydı yazılır
-   ↓
-7. Yanıt döndürülür
+┌─────────────────────────────┐
+│  CONTROLLER KATMANI         │
+│  (REST API Uç Noktaları)    │
+└──────────────┬──────────────┘
+               │
+┌──────────────▼──────────────┐
+│  SERVICE KATMANI            │
+│  (İş Mantığı)               │
+└──────────────┬──────────────┘
+               │
+┌──────────────▼──────────────┐
+│  REPOSITORY KATMANI         │
+│  (Veri Erişimi - JPA)       │
+└──────────────┬──────────────┘
+               │
+┌──────────────▼──────────────┐
+│  VERİ TABANI KATMANI        │
+│  (MySQL)                    │
+└─────────────────────────────┘
 ```
 
-### 4.3. İade ve Ceza İş Akışı
+### Katmanların Görevleri
 
-```
-1. Kullanıcı kitap iade isteği gönderir
-   ↓
-2. İade tarihi güncelenir
-   ↓
-3. Tetikleyici çalışır:
-   - Due date < return date mi kontrol edilir
-   - Eğer evet ise ceza hesaplanır ve penalties'e yazılır
-   - Stok 1 artırılır
-   - Audit_log'a kaydı yazılır
-   ↓
-4. Yanıt döndürülür
-```
+- **Controller Katmanı:** Dış dünyadan gelen HTTP isteklerini (REST API) karşılar (Ör: AuthController, BookController)
+- **Service Katmanı:** İş mantığının yürütüldüğü katmandır (Stok kontrolü, ceza hesaplama mantığı vb.)
+- **Repository Katmanı:** Hibernate/JPA kullanılarak veri tabanı ile iletişimin sağlandığı veri erişim katmanıdır
 
-### 4.4. Güvenlik
+### Kullanılan Teknolojiler
 
-- **Şifre Hashing:** BCrypt ile güvenli şifre depolama
-- **JWT Token:** 24 saat geçerlilik süresi
-- **Role-Based Access:** Admin/User ayrımı
-- **CORS:** Gerekli origin'lerin konfigürasyonu
-- **SQL Injection Koruması:** Parametreli sorgular
+| Teknoloji | Versiyon | Amaç |
+|-----------|----------|------|
+| Java | 21 | Backend programlama dili |
+| Spring Boot | 3.5.0 | Web framework ve REST API |
+| MySQL | 8.0+ | İlişkisel veri tabanı |
+| Hibernate/JPA | Latest | ORM (Object-Relational Mapping) |
+| JWT | 0.11.5 | Kimlik doğrulama |
+| BCrypt | Built-in | Şifre hashleme |
 
 ---
 
-## 5. Test Senaryoları
+## 5. Güvenlik ve Kimlik Doğrulama
 
-Postman ile test edilen temel senaryolar:
+Sistem güvenliği modern standartlara uygun olarak sağlanmıştır:
 
-| Test No | Senaryo | Sonuç |
-|---------|---------|-------|
-| TC-01 | Kullanıcı Kaydı | ✅ Başarılı - Kullanıcı eklenir |
-| TC-02 | E-posta Doğrulama | ✅ Başarılı - Token kontrol edilir |
-| TC-03 | Giriş Yapma | ✅ Başarılı - JWT token üretilir |
-| TC-04 | Kitap Arama | ✅ Başarılı - Sonuçlar listelenir |
-| TC-05 | Kitap Ödünç Alma | ✅ Başarılı - Stok 1 azalır |
-| TC-06 | Zamanında İade | ✅ Başarılı - Stok 1 artar, ceza yok |
-| TC-07 | Geç İade | ✅ Başarılı - Otomatik ceza oluşur |
-| TC-08 | Stoksuz İşlem | ✅ Başarılı - İşlem engellenir |
-| TC-09 | Yetki Kontrolü | ✅ Başarılı - Yetkisiz erişim engellenir |
-| TC-10 | Admin Kitap Eklemesi | ✅ Başarılı - Kitap eklenir |
+### Kimlik Doğrulama (Authentication)
+- JWT (JSON Web Token) kullanılarak **24 saat geçerli token** üretilir
+- API isteklerinde token doğrulama yapılır
+- Hatalı token'lar reddedilir
+
+### Parola Güvenliği
+- Kullanıcı şifreleri veri tabanında açık metin olarak tutulmaz
+- **BCrypt algoritması** ile hash'lenerek saklanır
+- Her şifre farklı salt ile hash'lenir (rainbow table atağından koruma)
+
+### Yetkilendirme (Authorization)
+- Admin ve Normal Kullanıcı rolleri ayrıştırılır
+- Rol tabanlı erişim kontrolü (RBAC) sağlanır
+- Yetkisiz kullanıcılar 403 Forbidden hatası alır
+
+### Ek Güvenlik Önlemleri
+- SQL Injection koruması (parametreli sorgular)
+- CORS (Cross-Origin Resource Sharing) yapılandırması
+- E-posta doğrulama mekanizması
 
 ---
 
-## 6. Sonuç ve Kazanımlar
+## 6. Test Senaryoları ve Sonuçları
 
-Bu proje sayesinde aşağıdaki konularda deneyim kazanıldı:
+Geliştirilen sistemin fonksiyonları Postman ve arayüz üzerinden test edilmiş, aşağıdaki senaryolar başarıyla sonuçlanmıştır:
+
+| Test No | Senaryo | Beklenen Sonuç | Durum |
+|---------|---------|----------------|-------|
+| TC-01 | Kullanıcı Kaydı | Yeni kullanıcı eklenir, şifre hash'lenir | ✅ Başarılı |
+| TC-02 | Kitap Arama | Girilen isme göre doğru sonuçlar listelenir | ✅ Başarılı |
+| TC-03 | Ödünç Alma | Borrows kaydı oluşur, stok otomatik 1 azalır (Trigger) | ✅ Başarılı |
+| TC-04 | Stoksuz İşlem | Stok 0 ise işlem engellenir, hata döner | ✅ Başarılı |
+| TC-05 | Geç İade ve Ceza | İade tarihi geçmişse otomatik ceza tablosu oluşur | ✅ Başarılı |
+| TC-06 | Yetkisiz Erişim | Normal kullanıcı Admin paneline erişemez (403 Hata) | ✅ Başarılı |
+
+---
+
+## 7. Sonuç ve Kazanımlar
+
+Proje sonucunda ilişkisel veri tabanı tasarımı, 3NF normalizasyon kuralları ve Trigger kullanımı ile iş mantığının veri tabanı seviyesine taşınması konularında deneyim kazanılmıştır.
 
 ### Teknik Kazanımlar
-- İlişkisel veritabanı tasarımı ve 3NF uygulaması
-- SQL Trigger'ları ile iş mantığının veritabanı katmanına taşınması
-- Spring Boot ve REST API geliştirme
-- JPA/Hibernate ORM kullanımı
-- JWT tabanlı kimlik doğrulama ve yetkilendirme
+
+- İlişkisel veri tabanı tasarımı ve 3NF uygulaması
+- MySQL Trigger'ları ile iş mantığının optimizasyonu
+- Spring Boot ve JPA/Hibernate entegrasyonu
+- JWT tabanlı güvenli kimlik doğrulama
+- RESTful API tasarımı ve geliştirmesi
 
 ### Pratik Kazanımlar
-- Katmanlı mimari (Layered Architecture) tasarımı
-- Git ve sürüm kontrolü
+
+- Katmanlı mimari (Layered Architecture) uygulaması
+- Veri tabanı normalizasyon pratiği
+- Git ve sürüm kontrolü kullanımı
 - Postman ile API testi
 - Hata yönetimi ve exception handling
-- Veritabanı optimization
 
 ### Mühendislik Kazanımları
+
 - Sistem analizi ve tasarımı
 - İş gereksinimlerini teknik çözümlere dönüştürme
-- Güvenlik ve veri koruması
-- Performans ve ölçeklenebilirlik düşünmek
+- Veri tutarlılığı ve bütünlüğü sağlama
+- Güvenlik ve veri koruma prensipleri
+- Kod kalitesi ve sürdürülebilirlik
 
 ---
 
-## 7. Kaynakça
+## Kaynakça
 
 1. Spring Boot Official Documentation - https://spring.io/projects/spring-boot
 2. MySQL 8.0 Reference Manual - https://dev.mysql.com/doc/
-3. Hibernate ORM Guide - https://hibernate.org/orm/documentation/
-4. JWT.io - https://jwt.io/
-5. Ders Notları - Hakan Aydın, YZM2017 - Veri Tabanı ve Yönetimi
+3. Hibernate ORM User Guide - https://hibernate.org/orm/documentation/
+4. JWT.io - JSON Web Tokens - https://jwt.io/
+5. Yusuf Tan Durmuş, "Akıllı Kütüphane Yönetim Sistemi", GitHub Repository
+6. Ders Notları - Hakan Aydın, YZM2017 - Veri Tabanı ve Yönetimi
 
 ---
 
